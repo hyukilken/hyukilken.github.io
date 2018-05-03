@@ -59,7 +59,9 @@ function startApp() {
   document.getElementById('contractAddr').innerHTML = getLink(contractAddress);
   web3.eth.getAccounts(function(e,r){
     document.getElementById('accountAddr').innerHTML = getLink(r[0]);
-    document.getElementById('myBalance').innerHTML = web3.eth.getBalance(r[0]);
+    web3.eth.getBalance(r[0],function(e,r){
+      document.getElementById('myBalance').innerHTML = r;
+    });
   });
 
   getValue();
