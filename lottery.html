@@ -13,9 +13,10 @@
   </style>
 </head>
 <body>
-<h3>Lottery Dapp</h3>
+<h3>Lottery dApp</h3>
 <ul>
   <li>컨트랙트 주소: <span id="contractAddr"></span></li>
+  <li>관리자 어카운트 주소: <span id="accountAddrAdmin"></span></li>
   <li>내 어카운트 주소: <span id="accountAddr"></span></li>
   <li>컨트랙트에 저장된 값: <span id="storedData"></span>
     <button onclick="getValue()">새로고침</button> (현재블록: <span id="lastBlock"></span>)</li>
@@ -23,20 +24,18 @@
       <div id="result"></div></li>
   <li>새 값을 저장한 후 팬딩 트랜잭션이 블록에 포함되면 자동으로 페이지가 업데이트될 것입니다.</li>
 </ul>
+<ol id="accountPlayers"></ol>
 
-컨트랙트 소스
-<script src="https://gist.github.com/atomrigs/7c633570496b79623bed5d1286f93f3a.js"></script>
-</p>
 
 </body>
 <script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
 <!-- script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script -->
 <script>
-var contractAddress = '0x1b5c691bda50ca6ac687d09e2e4c6bd032a23324';
+var contractAddress = '0xe72cb80238271cbaaaf1a53954300ad794b7113a';
 var abi = [ { "constant": false, "inputs": [], "name": "enter", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "constant": false, "inputs": [], "name": "pickWinner", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "constant": true, "inputs": [], "name": "getPlayers", "outputs": [ { "name": "", "type": "address[]" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "manager", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "players", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function" } ];
 //var abi = [{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"}];
-var simpleStorageContract;
-var simpleStorage;
+var lotteryContract;
+var lottery;
 
 window.addEventListener('load', function() {
 
@@ -54,11 +53,26 @@ window.addEventListener('load', function() {
 });
 
 function startApp() {
-  simpleStorageContract = web3.eth.contract(abi);
-  simpleStorage = simpleStorageContract.at(contractAddress);
+  lotteryContract = web3.eth.contract(abi);
+  lottery = lotteryContract.at(contractAddress);
   document.getElementById('contractAddr').innerHTML = getLink(contractAddress);
   web3.eth.getAccounts(function(e,r){
     document.getElementById('accountAddr').innerHTML = getLink(r[0]);
+    web3.eth.getBalance(r[0],function(e,r){
+      document.getElementById('myBalance').innerHTML = r + ' wei';
+    });
+  });
+
+  lottery.getManager(function(e,r){
+    document.getElementById('accountAddrAdmin').innerHTML = getLink(r[0]);
+  });
+
+  lottery.getPlayers(function(e,r){
+    var str;
+    for(var i=0;i < r.length;i++){
+      str += "<li>" + getLink(r[i]) + "</li>";
+    }
+    document.getElementById('accountPlayers').innerHTML = str;
   });
 
   getValue();
@@ -69,10 +83,12 @@ function getLink(addr) {
 }
 
 function getValue() {
-  simpleStorage.get(function(e,r){
-    document.getElementById('storedData').innerHTML=r.toNumber();
+  
+  //lottery.get(function(e,r){
+   // document.getElementById('storedData').innerHTML=r.toNumber();
+  //});
+  
 
-  });
   web3.eth.getBlockNumber(function(e,r){
     document.getElementById('lastBlock').innerHTML = r;
   });
@@ -81,8 +97,8 @@ function getValue() {
 function setValue() {
 
   var newValue = document.getElementById('newValue').value;
-  var txid
-  simpleStorage.set(newValue, function(e,r){
+  var txid;
+  lottery.set(newValue, function(e,r){
     document.getElementById('result').innerHTML = 'Transaction id: ' + r + '<span id="pending" style="color:red;">(Pending)</span>';
     txid = r;
   });
