@@ -24,6 +24,8 @@
   <li><input id="newValue" type="text"><button onclick="setValue()">새 값으로 저장하기</button>
       <div id="result"></div></li>
   <li>새 값을 저장한 후 팬딩 트랜잭션이 블록에 포함되면 자동으로 페이지가 업데이트될 것입니다.</li>
+  <li>현재까지 복권 구매자 수: <span id="playerCnt"></span></li>
+  <li>현재 총 구매 금액: <span id="totalMoney"></span></li>
 </ul>
 <ol id="accountPlayers"></ol>
 
@@ -83,6 +85,12 @@ function getValue() {
       str += "<li>" + getLink(r[i]) + "</li>";
     }
     document.getElementById('accountPlayers').innerHTML = str;
+
+    document.getElementById('playerCnt').innerHTML = r.length + "명";
+  });
+
+  web3.eth.getBalance(contractAddress,function(e,r){
+    document.getElementById('totalMoney').innerHTML = r + ' wei';
   });
   
 
