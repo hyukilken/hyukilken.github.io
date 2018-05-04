@@ -65,7 +65,7 @@ function startApp() {
   });
 
   lottery.getManager(function(e,r){
-    document.getElementById('accountAddrAdmin').innerHTML = getLink(r[0]);
+    document.getElementById('accountAddrAdmin').innerHTML = getLink(r);
   });
 
   lottery.getPlayers(function(e,r){
