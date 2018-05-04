@@ -68,14 +68,6 @@ function startApp() {
     document.getElementById('accountAddrAdmin').innerHTML = getLink(r);
   });
 
-  lottery.getPlayers(function(e,r){
-    var str;
-    for(var i=0;i < r.length;i++){
-      str += "<li>" + getLink(r[i]) + "</li>";
-    }
-    document.getElementById('accountPlayers').innerHTML = str;
-  });
-
   getValue();
 }
 
@@ -85,9 +77,13 @@ function getLink(addr) {
 
 function getValue() {
   
-  //lottery.get(function(e,r){
-   // document.getElementById('storedData').innerHTML=r.toNumber();
-  //});
+  lottery.getPlayers(function(e,r){
+    var str = "";
+    for(var i=0;i < r.length;i++){
+      str += "<li>" + getLink(r[i]) + "</li>";
+    }
+    document.getElementById('accountPlayers').innerHTML = str;
+  });
   
 
   web3.eth.getBlockNumber(function(e,r){
