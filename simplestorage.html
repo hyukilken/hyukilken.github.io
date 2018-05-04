@@ -84,7 +84,7 @@ function getValue() {
 function setValue() {
 
   var newValue = document.getElementById('newValue').value;
-  var txid;
+  var txid
   simpleStorage.set(newValue, function(e,r){
     document.getElementById('result').innerHTML = 'Transaction id: ' + r + '<span id="pending" style="color:red;">(Pending)</span>';
     txid = r;

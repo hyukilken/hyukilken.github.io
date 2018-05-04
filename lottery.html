@@ -19,15 +19,15 @@
   <li>관리자 어카운트 주소: <span id="accountAddrAdmin"></span></li>
   <li>내 어카운트 주소: <span id="accountAddr"></span></li>
   <li>내 밸런스: <span id="myBalance"></span></li>
-  <li>컨트랙트에 저장된 값: <span id="storedData"></span>
-    <button onclick="getValue()">새로고침</button> (현재블록: <span id="lastBlock"></span>)</li>
-  <li><input id="newValue" type="text"><button onclick="setValue()">새 값으로 저장하기</button>
-      <div id="result"></div></li>
-  <li>새 값을 저장한 후 팬딩 트랜잭션이 블록에 포함되면 자동으로 페이지가 업데이트될 것입니다.</li>
   <li>현재까지 복권 구매자 수: <span id="playerCnt"></span></li>
   <li>현재 총 구매 금액: <span id="totalMoney"></span></li>
+  <li>새 값을 저장한 후 팬딩 트랜잭션이 블록에 포함되면 자동으로 페이지가 업데이트될 것입니다.</li>
 </ul>
+
+<button onclick="buy()">구매하기</button><span id="result"></span>
+
 <ol id="accountPlayers"></ol>
+
 
 
 </body>
@@ -77,6 +77,7 @@ function getLink(addr) {
   return '<a target="_blank" href=https://ropsten.etherscan.io/address/' + addr + '>' + addr +'</a>';
 }
 
+
 function getValue() {
   
   lottery.getPlayers(function(e,r){
@@ -94,9 +95,27 @@ function getValue() {
   });
   
 
-  web3.eth.getBlockNumber(function(e,r){
-    document.getElementById('lastBlock').innerHTML = r;
-  });
+  
+}
+
+function buy() {
+  var txid;
+  lottery.enter(10000,function(e,r){
+    document.getElementById('result').innerHTML = 'Transaction id: ' + r + '<span id="pending" style="color:red;">(Pending)</span>';
+    txid = r;
+  });  
+  var filter = web3.eth.filter('latest');
+  filter.watch(function(e, r) {
+    getValue();
+    web3.eth.getTransaction(txid, function(e,r){
+      if (r != null && r.blockNumber > 0) {
+        document.getElementById('pending').innerHTML = '(기록된 블록: ' + r.blockNumber + ')';
+        document.getElementById('pending').style.cssText ='color:green;';
+       // document.getElementById('storedData').style.cssText ='color:green; font-size:300%;';
+        filter.stopWatching();
+      }
+   });
+ });
 }
 
 function setValue() {
@@ -114,7 +133,7 @@ function setValue() {
       if (r != null && r.blockNumber > 0) {
         document.getElementById('pending').innerHTML = '(기록된 블록: ' + r.blockNumber + ')';
         document.getElementById('pending').style.cssText ='color:green;';
-        document.getElementById('storedData').style.cssText ='color:green; font-size:300%;';
+       // document.getElementById('storedData').style.cssText ='color:green; font-size:300%;';
         filter.stopWatching();
       }
    });
